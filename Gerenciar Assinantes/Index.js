@@ -1,37 +1,32 @@
 const express = require('express');
 const multer = require('multer');
-const assistantController = require('./controllers/assistantController');
+const mongoose = require('mongoose');
+const routes = require('./routes');
 
 const app = express();
 const port = 3000;
 
-// Configurando o armazenamento das imagens usando o Multer
+// Configuração do Multer para lidar com o upload de arquivos
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
+  destination: 'public/uploads/',
   filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);
+    const fileName = Date.now() + '-' + file.originalname;
+    cb(null, fileName);
   }
 });
-const upload = multer({ storage });
+const upload = multer({ storage: storage });
 
-// Configurando o controlador dos assistentes
-const assistantCtrl = new assistantController();
+// Conexão com o MongoDB
+mongoose.connect('mongodb://localhost:27017/assistantDB', { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {
+    console.log('Conectado ao MongoDB');
+    app.listen(port, () => {
+      console.log(`Servidor em execução na porta ${port}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Erro ao conectar ao MongoDB:', err);
+  });
 
-// Rota para listar todos os assistentes
-app.get('/assistants', assistantCtrl.getAllAssistants.bind(assistantCtrl));
-
-// Rota para criar um novo assistente com imagem
-app.post('/assistants', upload.single('image'), assistantCtrl.createAssistant.bind(assistantCtrl));
-
-// Rota para atualizar um assistente existente com imagem
-app.put('/assistants/:id', upload.single('image'), assistantCtrl.updateAssistant.bind(assistantCtrl));
-
-// Rota para excluir um assistente
-app.delete('/assistants/:id', assistantCtrl.deleteAssistant.bind(assistantCtrl));
-
-// Iniciando o servidor
-app.listen(port, () => {
-  console.log(`Servidor iniciado na porta ${port}`);
-});
+// Configuração das rotas
+routes(app, upload);
