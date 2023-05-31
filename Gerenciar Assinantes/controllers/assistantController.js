@@ -1,52 +1,67 @@
 const Assistant = require('../models/assistant');
-const assistantView = require('../views/assistantView');
 
 class AssistantController {
   async getAllAssistants(req, res) {
     try {
-      const assistants = await Assistant.getAll();
-      res.json(assistantView.renderMany(assistants));
+      const assistants = await Assistant.find();
+      res.json(assistants);
     } catch (err) {
-      res.status(500).send('Erro ao obter os assistentes');
+      res.status(500).json({ error: err.message });
     }
   }
 
   async createAssistant(req, res) {
-    const assistantData = req.body;
-    if (req.file) {
-      assistantData.image = req.file.filename;
-    }
     try {
-      const createdAssistant = await Assistant.create(assistantData);
-      res.json(assistantView.render(createdAssistant));
+      const { name } = req.body;
+      const image = req.file.filename;
+
+      const assistant = new Assistant({ name, image });
+      await assistant.save();
+
+      res.status(201).json(assistant);
     } catch (err) {
-      res.status(500).send('Erro ao criar o assistente');
+      res.status(400).json({ error: err.message });
     }
   }
 
   async updateAssistant(req, res) {
-    const id = req.params.id;
-    const updates = req.body;
-    if (req.file) {
-      updates.image = req.file.filename;
-    }
     try {
-      const updatedAssistant = await Assistant.update(id, updates);
-      res.json(assistantView.render(updatedAssistant));
+      const { id } = req.params;
+      const { name } = req.body;
+      const image = req.file ? req.file.filename : undefined;
+
+      const assistant = await Assistant.findById(id);
+      if (!assistant) {
+        return res.status(404).json({ error: 'Assistant not found' });
+      }
+
+      assistant.name = name;
+      if (image) {
+        assistant.image = image;
+      }
+
+      await assistant.save();
+
+      res.json(assistant);
     } catch (err) {
-      res.status(500).send('Erro ao atualizar o assistente');
+      res.status(400).json({ error: err.message });
     }
   }
 
   async deleteAssistant(req, res) {
-    const id = req.params.id;
     try {
-      await Assistant.delete(id);
-      res.sendStatus(204);
+      const { id } = req.params;
+
+      const assistant = await Assistant.findByIdAndDelete(id);
+      if (!assistant) {
+        return res.status(404).json({ error: 'Assistant not found' });
+      }
+
+      res.json({ message: 'Assistant deleted' });
     } catch (err) {
-      res.status(500).send('Erro ao excluir o assistente');
+      res.status(400).json({ error: err.message });
     }
   }
 }
 
-module.exports = AssistantController;
+module.exports = new AssistantController();
