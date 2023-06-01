@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
   }
 });
 const upload = multer({ storage: storage });
-
+/*
 // Conexão com o MongoDB
 mongoose.connect('mongodb://0.0.0.0:27017/assistantDB', { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
@@ -26,7 +26,7 @@ mongoose.connect('mongodb://0.0.0.0:27017/assistantDB', { useNewUrlParser: true,
   })
   .catch((err) => {
     console.error('Erro ao conectar ao MongoDB:', err);
-  });
+  }); */
 
 // Configuração das rotas
 routes(app, upload);
