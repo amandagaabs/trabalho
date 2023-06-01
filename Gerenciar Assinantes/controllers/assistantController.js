@@ -1,4 +1,4 @@
-const Assistant = require('../models/assistant');
+const Assistant = require('../models/assistant.');
 
 class AssistantController {
   async getAllAssistants(req, res) {
