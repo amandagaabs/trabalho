@@ -17,7 +17,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Conexão com o MongoDB
-mongoose.connect('mongodb://localhost:3000/assistantDB', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect('mongodb://localhost:27017/assistantDB', { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log('Conectado ao MongoDB');
     app.listen(port, () => {
